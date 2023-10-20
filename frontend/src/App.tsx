@@ -7,28 +7,27 @@ const status_active : Status = "Active";
 const status_churned: Status = "Churned";
 
 type FormData = {
-firstName: string;
-middleName: string;
-lastName: string;
-dateOfBirth: string;
-status: Status;
-address: string;
-additionalFields: {[field : string] : string}
+    firstName: string;
+    middleName: string;
+    lastName: string;
+    dateOfBirth: string;
+    status: Status;
+    addresses: string[];
+    additionalFields: {[field : string] : string}
 };
 
-type UserFormProps = {};
-
-export default function App (props: UserFormProps) {
+export default function App () {
     const [formData, setFormData] = useState<FormData>({
         firstName: '',
         middleName: '',
         lastName: '',
         dateOfBirth: '',
         status: "Active",
-        address: '',
+        addresses: [],
         additionalFields: {}
     });
 
+    const [addresses, setAddresses] = React.useState<string[]>([""]);
     const [additionalFieldNames, setAdditionalFieldNames]= React.useState<string[]>([]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -102,6 +101,36 @@ export default function App (props: UserFormProps) {
         })
     }
 
+    const addNewAddress = () => {
+        const copy = [...addresses, ""];
+        setAddresses(copy);
+        setFormData({
+            ...formData,
+            addresses: copy
+        })
+    }
+
+    const changeAddress = (index : number, value : string) => {
+        const copy = [...addresses];
+        copy[index] = value;
+        setAddresses(copy);
+
+        setFormData({
+            ...formData,
+            addresses: copy
+        })
+    }
+
+    const deleteAddress = (index : number) => {
+        const copy = [...addresses];
+        copy.splice(index,1);
+        setAddresses(copy);
+        setFormData({
+            ...formData,
+            addresses: copy
+        })
+    }
+
     const handleSubmit = () => {
         console.log(formData);
     };
@@ -168,16 +197,31 @@ export default function App (props: UserFormProps) {
             <br></br>
 
             <label>
-            Address:
-            <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-            />
+            Addresses:
+            {
+                addresses.map( (value, index) => (
+                    <div key={index}>
+                        <input
+                            type="text"
+                            value={addresses[index]}
+                            onChange={(e) => changeAddress(index, e.target.value)}
+                        />
+                        {
+                            index > 0 ?
+                            <button onClick={ () => deleteAddress(index)}>
+                                Delete Address
+                            </button> :
+                            null
+                        }
+                        <br></br>
+                    </div>
+                ))
+            }
             </label>
+            <button onClick={addNewAddress}>Add Address</button>
             <br></br>
 
+            <p>Additional Fields</p>
             {
                 additionalFieldNames.map( (value,index) => (
                     <div key={index}>
@@ -196,6 +240,7 @@ export default function App (props: UserFormProps) {
                     </div>
                 ))
             }
+            <br></br>
 
             <button onClick={addNewField}>Add Field</button>
             <button onClick={handleSubmit}>Submit</button>
