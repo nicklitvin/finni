@@ -2,6 +2,7 @@ import express from "express";
 import * as mysql from "mysql2";
 import dotenv from "dotenv";
 import { Pool as PromisePool } from 'mysql2/promise';
+import crypto from "crypto";
 
 type Status = "Inquiry" | "Onboarding" | "Active" | "Churned";
 const status_inquiry : Status = "Inquiry";
@@ -9,8 +10,8 @@ const status_onboard : Status = "Onboarding";
 const status_active : Status = "Active";
 const status_churned: Status = "Churned";
 
-const db_basic_info = "basic";
-const db_extra_info = "extra";
+const db_basic = "basic";
+const db_extra = "extra";
 
 const column_patient_id = "patient_id";
 const column_first_name = "first";
@@ -51,7 +52,7 @@ class dbManger {
     async setupTables() {
         const db_basic_setup = 
         `
-        create table if not exists ${db_basic_info}
+        create table if not exists ${db_basic}
         (
             ${column_patient_id} ${varchar},
             ${column_first_name} ${varchar},
@@ -64,7 +65,7 @@ class dbManger {
 
         const db_extra_setup = 
         `
-        create table if not exists ${db_extra_info}
+        create table if not exists ${db_extra}
         (
             ${column_patient_id} ${varchar},
             ${column_data_type} ${varchar},
@@ -83,12 +84,75 @@ class dbManger {
     }
 
     async createPatient(patientData : FormData) {
+        const patient_id = crypto.randomUUID();
+
+        const basic_command = 
+        `
+        insert into ${db_basic} 
+        (
+            ${column_patient_id},
+            ${column_first_name},
+            ${column_middle_name},
+            ${column_last_name},
+            ${column_status},
+            ${column_birthday}
+        )
+        values 
+        (
+            '${patient_id}', 
+            '${patientData.firstName}', 
+            '${patientData.middleName}',
+            '${patientData.lastName}', 
+            '${patientData.status}', 
+            '${patientData.dateOfBirth}'
+        )
+        `;
+
+        const make_extra_insert = (id : string, data_type: string, data_value : string) => {
+            return (
+                `
+                insert into ${db_extra}
+                (
+                    ${column_patient_id},
+                    ${column_data_type},
+                    ${column_data_value}
+                )
+                values
+                ( '${id}', '${data_type}', '${data_value}')
+                `
+            )
+        }
+        await this.runQuery(basic_command);
+
+        for (let address of patientData.addresses) {
+            const address_command = make_extra_insert(patient_id, "address", address);
+            await this.runQuery(address_command);
+        }
+
+        for (let extra of Object.entries(patientData.additionalFields)) {
+            const extra_command = make_extra_insert(patient_id, extra[0], extra[1]);
+            await this.runQuery(extra_command);
+        }
     }
 }
 
 const manager = new dbManger();
 
-manager.setupTables();
+// manager.setupTables();
+
+// const ex : FormData = {
+//     firstName: "1",
+//     middleName: "2",
+//     lastName: "3",
+//     dateOfBirth: "01/01/2001",
+//     addresses: ["ad1","ad2"],
+//     status: "Active",
+//     additionalFields: {
+//         yes: "yes",
+//         no: "no"
+//     }
+// };
+// manager.createPatient(ex);
 
 // const app = express();
 // app.use(express.json());
