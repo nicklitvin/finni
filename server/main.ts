@@ -134,26 +134,56 @@ class dbManger {
             await this.runQuery(extra_command);
         }
     }
+
+    async getAllPatientInfo() {
+        const type_alias = "types";
+        const value_alias = "type_values";
+
+        const patients = await this.runQuery(
+            `
+            select
+                ${db_basic}.${column_patient_id},
+                ${db_basic}.${column_first_name},
+                ${db_basic}.${column_middle_name},
+                ${db_basic}.${column_last_name},
+                ${db_basic}.${column_status},
+                ${db_basic}.${column_birthday},
+                group_concat(${db_extra}.${column_data_type}) as ${type_alias},
+                group_concat(${db_extra}.${column_data_value}) as ${value_alias} 
+            from ${db_basic} 
+            left join ${db_extra} on 
+                ${db_basic}.${column_patient_id} = ${db_extra}.${column_patient_id}
+            group by 
+                ${db_basic}.${column_patient_id},
+                ${db_basic}.${column_first_name},
+                ${db_basic}.${column_middle_name},
+                ${db_basic}.${column_last_name},
+                ${db_basic}.${column_status},
+                ${db_basic}.${column_birthday}
+            `
+        )
+        return patients;
+    }
 }
 
 const manager = new dbManger();
+manager.getAllPatientInfo();
 
 // manager.setupTables();
 
 // const ex : FormData = {
-//     firstName: "1",
-//     middleName: "2",
+//     firstName: "12",
+//     middleName: "23",
 //     lastName: "3",
 //     dateOfBirth: "01/01/2001",
-//     addresses: ["ad1","ad2"],
+//     addresses: ["one"],
 //     status: "Active",
 //     additionalFields: {
-//         yes: "yes",
-//         no: "no"
 //     }
 // };
 // manager.createPatient(ex);
 
+console.log("complete");
 // const app = express();
 // app.use(express.json());
 // const port = 3000;
@@ -172,3 +202,7 @@ const manager = new dbManger();
 // })
 
 // app.listen(port);
+
+/*
+
+*/
