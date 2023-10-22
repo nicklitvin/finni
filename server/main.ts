@@ -3,6 +3,7 @@ import * as mysql from "mysql2";
 import dotenv from "dotenv";
 import { Pool as PromisePool } from 'mysql2/promise';
 import crypto from "crypto";
+import cors from "cors";
 
 type Status = "Inquiry" | "Onboarding" | "Active" | "Churned";
 const status_inquiry : Status = "Inquiry";
@@ -167,7 +168,7 @@ class dbManger {
 }
 
 const manager = new dbManger();
-manager.getAllPatientInfo();
+// manager.getAllPatientInfo();
 
 // manager.setupTables();
 
@@ -183,26 +184,25 @@ manager.getAllPatientInfo();
 // };
 // manager.createPatient(ex);
 
-console.log("complete");
-// const app = express();
-// app.use(express.json());
-// const port = 3000;
 
+const app = express();
+app.use(cors());
+app.use (express.json());
+const port = 3001;
 
+const urlCreatePatient = "/createPatient";
 
-// const urlCreatePatient = "/createPatient";
+app.post(urlCreatePatient, async (req,res) => {
+    try {
+        const patientData = req.body as FormData; 
+        console.log("reeceived",patientData);
+        await manager.createPatient(patientData);
+        res.status(200).send()
 
-// app.post(urlCreatePatient, (req,res) => {
-//     try {
-//         const command = req.body; 
+    } catch (err) {
+        res.status(400).send();
+    }
+})
 
-//     } catch (err) {
-//         console.log(err);
-//     }
-// })
-
-// app.listen(port);
-
-/*
-
-*/
+app.listen(port);
+console.log("server running");
