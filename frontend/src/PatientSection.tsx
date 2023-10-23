@@ -56,7 +56,17 @@ export default function PatientSection() {
     const makePatientSection = (patient : PatientData) => {
         const typesList = patient.types == null ? [] : patient.types.split(",");
         const typeValueList = patient.type_values == null ? [] : patient.type_values.split(",");
-        const combinedList = typesList.map( (value,index) => [value, typeValueList[index]]);
+
+        const addressList : string[] = []
+        const otherList : string[][] = []
+
+        for (let index in typesList) {
+            if (typesList[index] === "Addresses") {
+                addressList.push(typeValueList[index])
+            } else {
+                otherList.push( [typesList[index], typeValueList[index]])
+            }
+        }
 
         return (
             <div key={`patient-${patient.patient_id}`}>
@@ -67,22 +77,12 @@ export default function PatientSection() {
                 <p>{`Birthday: ${patient.birthday}`}</p>
                 <p>Addresses</p>
                 <ul>
-                {combinedList.map( (value, index) => 
-                    value[0] === "address" ? 
-                    <div key={`address${index}`}>
-                        <li>{value[1]}</li>  
-                        <br></br>
-                    </div> :
-                    null
+                {addressList.map( (value, index) => 
+                    <li key={`address-${index}`}>{value}</li>  
                 )}
                 </ul>
-                {combinedList.map( (value, index) => 
-                    value[0] !== "address" ? 
-                    <div key={`otherfield${index}`}>
-                        <p>{`${value[0]}: ${value[1]}`}</p>
-                        <br></br>
-                    </div> :
-                    null
+                {otherList.map( (value, index) => 
+                    <p key={`other-${index}`}>{`${value[0]}: ${value[1]}`}</p>
                 )}
                 <button onClick={() => deletePatient(patient.patient_id)}>Delete Patient</button>
                 <p>============================</p>

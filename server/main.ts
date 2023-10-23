@@ -122,7 +122,7 @@ class dbManger {
         await this.runQuery(basic_command);
 
         for (let address of patientData.addresses) {
-            const address_command = make_extra_insert(patient_id, "address", address);
+            const address_command = make_extra_insert(patient_id, "Addresses", address);
             await this.runQuery(address_command);
         }
 
@@ -194,19 +194,19 @@ class dbManger {
         }
 
         switch (field) {
-            case ("firstName"):
+            case ("First Name"):
                 query = basicQuery(column_first_name);
                 break;
-            case ("middleName"):
+            case ("Middle Name"):
                 query = basicQuery(column_middle_name);
                 break;
-            case ("lastName"):
+            case ("Last Name"):
                 query = basicQuery(column_last_name);
                 break;
-            case ("status"):
+            case ("Status"):
                 query = basicQuery(column_status);
                 break;    
-            case ("dateOfBirth"):
+            case ("Date Of Birth"):
                 query = basicQuery(column_birthday);
                 break;
             case (""):
@@ -261,10 +261,8 @@ const urlPatientQuery = "/queryPatient";
 app.post(urlCreatePatient, async (req,res) => {
     try {
         const patientData = req.body as FormData; 
-        console.log("reeceived",patientData);
         await manager.createPatient(patientData);
         res.status(200).send()
-
     } catch (err) {
         res.status(400).send();
     }
