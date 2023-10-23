@@ -1,0 +1,3 @@
+delete patient
+filter search bar
+edit patient data

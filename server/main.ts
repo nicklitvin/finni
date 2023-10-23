@@ -165,6 +165,20 @@ class dbManger {
         )
         return patients;
     }
+
+    async deletePatient(id : string) {
+        await this.runQuery(
+            `
+            delete from ${db_basic} where ${column_patient_id} = '${id}'
+            `
+        );
+
+        await this.runQuery(
+            `
+            delete from ${db_extra} where ${column_patient_id} = '${id}'
+            `
+        );
+    }
 }
 
 const manager = new dbManger();
@@ -192,6 +206,7 @@ const port = 3001;
 
 const urlCreatePatient = "/createPatient";
 const urlGetPatients = "/getPatients";
+const urlDeletePatient = "/deletePatient";
 
 app.post(urlCreatePatient, async (req,res) => {
     try {
@@ -208,10 +223,20 @@ app.post(urlCreatePatient, async (req,res) => {
 app.get(urlGetPatients, async (req,res) => {
     try {
         const data = await manager.getAllPatientInfo();
-        console.log(data);
         res.send(data);
     } catch (err) {
         res.status(404).send();
+    }
+})
+
+app.post(urlDeletePatient, async (req,res) => {
+    try {
+        const patient_id = req.body.patient_id;
+        await manager.deletePatient(patient_id);
+        res.status(200).send();
+
+    } catch (err) {
+        res.status(400).send();
     }
 })
 

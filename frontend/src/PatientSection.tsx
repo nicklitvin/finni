@@ -28,13 +28,35 @@ export default function PatientSection() {
         func();
     },[])
 
+    const deletePatient = async (patient_id : string) => {
+        try {
+            const delete_request : RequestInit = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    patient_id: patient_id
+                })
+            };
+
+            const response = await fetch("http://localhost:3001/deletePatient", delete_request);
+            if (response.status === 200) {
+                setData( data.filter( (patient) => patient.patient_id !== patient_id))
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     const makePatientSection = (patient : PatientData) => {
         const typesList = patient.types == null ? [] : patient.types.split(",");
         const typeValueList = patient.type_values == null ? [] : patient.type_values.split(",");
         const combinedList = typesList.map( (value,index) => [value, typeValueList[index]]);
 
         return (
-            <div>
+            <div key={`patient-${patient.patient_id}`}>
                 <p>{`First Name: ${patient.first}`}</p>
                 <p>{`Middle Name: ${patient.middle}`}</p>
                 <p>{`Last Name: ${patient.last}`}</p>
@@ -59,6 +81,7 @@ export default function PatientSection() {
                     </div> :
                     null
                 )}
+                <button onClick={() => deletePatient(patient.patient_id)}>Delete Patient</button>
                 <p>============================</p>
             </div>
         )
