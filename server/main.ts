@@ -191,6 +191,7 @@ app.use (express.json());
 const port = 3001;
 
 const urlCreatePatient = "/createPatient";
+const urlGetPatients = "/getPatients";
 
 app.post(urlCreatePatient, async (req,res) => {
     try {
@@ -201,6 +202,16 @@ app.post(urlCreatePatient, async (req,res) => {
 
     } catch (err) {
         res.status(400).send();
+    }
+})
+
+app.get(urlGetPatients, async (req,res) => {
+    try {
+        const data = await manager.getAllPatientInfo();
+        console.log(data);
+        res.send(data);
+    } catch (err) {
+        res.status(404).send();
     }
 })
 
