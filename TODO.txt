@@ -1,3 +1,2 @@
-delete patient
-filter search bar
+fix form object
 edit patient data

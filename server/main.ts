@@ -6,10 +6,6 @@ import crypto from "crypto";
 import cors from "cors";
 
 type Status = "Inquiry" | "Onboarding" | "Active" | "Churned";
-const status_inquiry : Status = "Inquiry";
-const status_onboard : Status = "Onboarding";
-const status_active : Status = "Active";
-const status_churned: Status = "Churned";
 
 const db_basic = "basic";
 const db_extra = "extra";
@@ -136,7 +132,7 @@ class dbManger {
         }
     }
 
-    async getAllPatientInfo() {
+    async getAllPatientInfo(condition : string = "") {
         const type_alias = "types";
         const value_alias = "type_values";
 
@@ -154,6 +150,7 @@ class dbManger {
             from ${db_basic} 
             left join ${db_extra} on 
                 ${db_basic}.${column_patient_id} = ${db_extra}.${column_patient_id}
+            ${condition}
             group by 
                 ${db_basic}.${column_patient_id},
                 ${db_basic}.${column_first_name},
@@ -179,6 +176,54 @@ class dbManger {
             `
         );
     }
+
+    async findPatients(field : string, value : string) {
+        let query : string = null;
+        const patients : string = null;
+
+        const basicQuery = (myField : string) => {
+            return `select ${column_patient_id} from ${db_basic} 
+                where ${myField} = '${value}'
+            `
+        }
+
+        const extraQuery = (myField : string) => {
+            return `select ${column_patient_id} from ${db_extra}
+                where ${column_data_type} = '${myField}' and
+                ${column_data_value} = '${value}'
+            `
+        }
+
+        switch (field) {
+            case ("firstName"):
+                query = basicQuery(column_first_name);
+                break;
+            case ("middleName"):
+                query = basicQuery(column_middle_name);
+                break;
+            case ("lastName"):
+                query = basicQuery(column_last_name);
+                break;
+            case ("status"):
+                query = basicQuery(column_status);
+                break;    
+            case ("dateOfBirth"):
+                query = basicQuery(column_birthday);
+                break;          
+            default:
+                query = extraQuery(field);
+                break
+        }
+
+        const sqlResult = await this.runQuery(query) as any[];
+        const validIds = sqlResult.map( (value) => `'${value[column_patient_id]}'`);
+        const joinedIds = `(${validIds.join(",")})`;
+        const patientConditions = 
+            `
+            where ${db_basic}.${column_patient_id} in ${joinedIds}
+            `;
+        return this.getAllPatientInfo(patientConditions);
+    }
 }
 
 const manager = new dbManger();
@@ -197,6 +242,9 @@ const manager = new dbManger();
 //     }
 // };
 // manager.createPatient(ex);
+
+console.log(await manager.findPatients("firstName","asd"));
+// console.log(await manager.runQuery(`select ${column_patient_id} from ${db_basic} where ${column_first_name} = 'asd'`))
 
 
 const app = express();
