@@ -179,7 +179,6 @@ class dbManger {
 
     async findPatients(field : string, value : string) {
         let query : string = null;
-        const patients : string = null;
 
         const basicQuery = (myField : string) => {
             return `select ${column_patient_id} from ${db_basic} 
@@ -209,7 +208,9 @@ class dbManger {
                 break;    
             case ("dateOfBirth"):
                 query = basicQuery(column_birthday);
-                break;          
+                break;
+            case (""):
+                return this.getAllPatientInfo();          
             default:
                 query = extraQuery(field);
                 break
@@ -243,7 +244,7 @@ const manager = new dbManger();
 // };
 // manager.createPatient(ex);
 
-console.log(await manager.findPatients("firstName","asd"));
+// console.log(await manager.findPatients("firstName","asd"));
 // console.log(await manager.runQuery(`select ${column_patient_id} from ${db_basic} where ${column_first_name} = 'asd'`))
 
 
@@ -255,6 +256,7 @@ const port = 3001;
 const urlCreatePatient = "/createPatient";
 const urlGetPatients = "/getPatients";
 const urlDeletePatient = "/deletePatient";
+const urlPatientQuery = "/queryPatient";
 
 app.post(urlCreatePatient, async (req,res) => {
     try {
@@ -285,6 +287,17 @@ app.post(urlDeletePatient, async (req,res) => {
 
     } catch (err) {
         res.status(400).send();
+    }
+})
+
+app.post(urlPatientQuery, async (req,res) => {
+    try {   
+        const field = req.body.field;
+        const value = req.body.value;
+        const data = await manager.findPatients(field,value);
+        res.status(200).send(data);
+    } catch (err) {
+        res.send([]);
     }
 })
 

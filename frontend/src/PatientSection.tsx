@@ -13,6 +13,9 @@ interface PatientData {
 
 export default function PatientSection() {
     const [data, setData] = React.useState<PatientData[]>([]);
+    const [field, setField] = React.useState("");
+    const [value, setValue] = React.useState("");
+    const [filterError, setFilterError] = React.useState("");
 
     React.useEffect( () => {
         const func = async () => {
@@ -87,9 +90,38 @@ export default function PatientSection() {
         )
     }
 
+    const makeFilterSearch = async () => {
+        try {
+            const data : {[key: string] : string} = {
+                field: field,
+                value: value
+            }
+            const request : RequestInit = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            }
+            const response = await fetch(`http://localhost:3001/queryPatient`, request);
+            const patientData = (await response.json()) as PatientData[];
+            setData(patientData);
+        } catch (err) {
+            setFilterError("bad filter request");
+        }
+    }
+
     return (
         <div>
             <h1>Patient Data</h1>
+            <div>
+                <input placeholder="field" onChange={(e) => setField(e.target.value)} value={field}/>
+                <input placeholder="value" onChange={(e) => setValue(e.target.value)} value={value}/>
+                <br></br>
+                <p>{filterError}</p>
+                <br></br>
+                <button onClick={makeFilterSearch}>Search</button>
+            </div>
             {data.map( (patient) => makePatientSection(patient))}
         </div>
     )
