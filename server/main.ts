@@ -25,8 +25,12 @@ const text_middle_name = "Middle Name";
 const text_last_name = "Last Name";
 const text_birthday = "Date of Birth";
 const text_status = "Status";
-
 const varchar = "varchar(255)";
+
+const urlCreatePatient = "/createPatient";
+const urlGetPatients = "/getPatients";
+const urlDeletePatient = "/deletePatient";
+const urlPatientQuery = "/queryPatient";
 
 type FormData = {
     patientId: string | null;
@@ -272,35 +276,10 @@ class dbManger {
 
 const manager = new dbManger();
 
-console.log(await manager.getAllPatientInfo());
-
-// manager.setupTables();
-
-// const ex : FormData = {
-//     firstName: "12",
-//     middleName: "23",
-//     lastName: "3",
-//     dateOfBirth: "01/01/2001",
-//     addresses: ["one"],
-//     status: "Active",
-//     additionalFields: {
-//     }
-// };
-// manager.createPatient(ex);
-
-// console.log(await manager.findPatients("firstName","asd"));
-// console.log(await manager.runQuery(`select ${column_patient_id} from ${db_basic} where ${column_first_name} = 'asd'`))
-
-
 const app = express();
 app.use(cors());
 app.use (express.json());
 const port = 3001;
-
-const urlCreatePatient = "/createPatient";
-const urlGetPatients = "/getPatients";
-const urlDeletePatient = "/deletePatient";
-const urlPatientQuery = "/queryPatient";
 
 app.post(urlCreatePatient, async (req,res) => {
     try {
