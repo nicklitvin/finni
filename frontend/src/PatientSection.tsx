@@ -1,7 +1,11 @@
 import React from "react";
 import { FormData } from "./PatientForm";
 
-export default function PatientSection() {
+interface Props {
+    setEditFormData : Function
+}
+
+export default function PatientSection( {setEditFormData} : Props ) {
     const [data, setData] = React.useState<FormData[]>([]);
     const [field, setField] = React.useState("");
     const [value, setValue] = React.useState("");
@@ -16,7 +20,6 @@ export default function PatientSection() {
             } catch (err) {
                 console.log(err);
             }
-
         }
         func();
     },[])
@@ -61,6 +64,7 @@ export default function PatientSection() {
                     <p key={`other-${index}`}>{`${value}: ${patient.additionalFields[value]}`}</p>
                 )}
                 <button onClick={() => deletePatient(patient.patientId as string)}>Delete Patient</button>
+                <button onClick={() => setEditFormData(patient)}>Edit Patient</button>
                 <p>============================</p>
             </div>
         )

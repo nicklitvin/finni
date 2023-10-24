@@ -88,7 +88,14 @@ class dbManger {
     }
 
     async createPatient(patientData : FormData) {
-        const patient_id = crypto.randomUUID();
+        let patient_id : string;
+
+        if (patientData.patientId) {
+            patient_id = patientData.patientId;
+            await this.deletePatient(patient_id);
+        } else {
+            patient_id = crypto.randomUUID();
+        }
 
         const basic_command = 
         `

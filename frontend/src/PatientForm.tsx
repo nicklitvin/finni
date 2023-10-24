@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 type Status = "Inquiry" | "Onboarding" | "Active" | "Churned";
 const status_inquiry : Status = "Inquiry";
@@ -24,20 +24,30 @@ export type FormData = {
     additionalFields: {[field : string] : string}
 };
 
-export default function PatientForm () {
-    const [formData, setFormData] = useState<FormData>({
-        patientId: null,
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        dateOfBirth: '',
-        status: "Active",
-        addresses: [""],
-        additionalFields: {}
-    });
+export const emptyForm : FormData = {
+    patientId: null,
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    dateOfBirth: '',
+    status: "Active",
+    addresses: [""],
+    additionalFields: {}
+}
 
+interface Props {
+    formData: FormData,
+    setFormData : Function,
+    edit: boolean
+}
+
+export default function PatientForm ( {formData, setFormData, edit} : Props ) {
     const [additionalFieldNames, setAdditionalFieldNames]= React.useState<string[]>([]);
     const [serverResponse, setServerResponse] = React.useState("");
+
+    React.useEffect( () => {
+        setAdditionalFieldNames(Object.keys(formData.additionalFields))
+    }, [formData]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -148,6 +158,13 @@ export default function PatientForm () {
             const response = await fetch("http://localhost:3001/createPatient", data);
             if (response.status === 200) {
                 setServerResponse("Successfully added")
+                if (formData.patientId) {
+                    const newForm : FormData = {
+                        ...formData,
+                        patientId: null
+                    }
+                    setFormData(newForm);
+                }
             } else {
                 setServerResponse("Error with Request")
             }
@@ -157,8 +174,8 @@ export default function PatientForm () {
     };
 
     return (
-        <div>
-            <h1>Add Patient</h1>
+        <div style={{display: (edit && formData.patientId == null) ? "none": "block"}}>
+            {edit ? <h1>Edit Patient</h1> : <h1>Add Patient</h1>}
             <label>
             {`${text_first_name}: `}
             <input
@@ -265,7 +282,9 @@ export default function PatientForm () {
             <br></br>
 
             <button onClick={addNewField}>Add Field</button>
-            <button onClick={handleSubmit}>Submit</button>
+            <br></br>
+            <button onClick={handleSubmit}>{edit ? "Submit Changes" : "Submit"}</button>
+            
             <p style={{color: "red"}}>{serverResponse}</p>
         </div>
     );
