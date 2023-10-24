@@ -6,7 +6,8 @@ const status_onboard : Status = "Onboarding";
 const status_active : Status = "Active";
 const status_churned: Status = "Churned";
 
-type FormData = {
+export type FormData = {
+    patientId: string | null;
     firstName: string;
     middleName: string;
     lastName: string;
@@ -18,6 +19,7 @@ type FormData = {
 
 export default function PatientForm () {
     const [formData, setFormData] = useState<FormData>({
+        patientId: null,
         firstName: '',
         middleName: '',
         lastName: '',

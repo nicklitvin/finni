@@ -23,6 +23,7 @@ const column_data_value = "data_value";
 const varchar = "varchar(255)";
 
 type FormData = {
+    patientId: string | null;
     firstName: string;
     middleName: string;
     lastName: string;
@@ -75,8 +76,8 @@ class dbManger {
         console.log("setup tables")
     }
 
-    async runQuery(command : string) {
-        const [rows, fields] = await this.pool.query(command);
+    async runQuery(command : string) : Promise<any> {
+        const [rows] = await this.pool.query(command);
         return rows;
     }
 
@@ -132,7 +133,7 @@ class dbManger {
         }
     }
 
-    async getAllPatientInfo(condition : string = "") {
+    async getAllPatientInfo(condition : string = "") : Promise<FormData[]> {
         const type_alias = "types";
         const value_alias = "type_values";
 
@@ -159,8 +160,37 @@ class dbManger {
                 ${db_basic}.${column_status},
                 ${db_basic}.${column_birthday}
             `
-        )
-        return patients;
+        );
+
+        const result : FormData[] = [];
+
+        for (let patient of patients) {
+            const typesList = patient.types == null ? [] : patient.types.split(",");
+            const typeValueList = patient.type_values == null ? [] : patient.type_values.split(",");
+    
+            const addressList : string[] = []
+            const additionalFields : {[field : string] : string} = {};
+    
+            for (let index in typesList) {
+                if (typesList[index] === "Addresses") {
+                    addressList.push(typeValueList[index])
+                } else {
+                    additionalFields[typesList[index]] = typeValueList[index];
+                }
+            }
+            result.push({
+                patientId: patient[column_patient_id] as string,
+                firstName: patient[column_first_name] as string,
+                middleName: patient[column_middle_name] as string,
+                lastName: patient[column_last_name] as string,
+                dateOfBirth: patient[column_birthday] as string,
+                status: patient[column_status] as Status,
+                addresses: addressList,
+                additionalFields: additionalFields
+            })
+        }
+
+        return result;
     }
 
     async deletePatient(id : string) {
@@ -228,7 +258,8 @@ class dbManger {
 }
 
 const manager = new dbManger();
-// manager.getAllPatientInfo();
+
+console.log(await manager.getAllPatientInfo());
 
 // manager.setupTables();
 

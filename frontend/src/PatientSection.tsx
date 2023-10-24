@@ -1,18 +1,8 @@
 import React from "react";
-
-interface PatientData {
-    patient_id: string,
-    first: string,
-    middle: string,
-    last: string,
-    status: string,
-    birthday: string,
-    types: string,
-    type_values: string
-}
+import { FormData } from "./PatientForm";
 
 export default function PatientSection() {
-    const [data, setData] = React.useState<PatientData[]>([]);
+    const [data, setData] = React.useState<FormData[]>([]);
     const [field, setField] = React.useState("");
     const [value, setValue] = React.useState("");
     const [filterError, setFilterError] = React.useState("");
@@ -21,7 +11,7 @@ export default function PatientSection() {
         const func = async () => {
             try {
                 const serverData = await fetch("http://localhost:3001/getPatients");
-                const jsonData = ( await serverData.json() ) as PatientData[];
+                const jsonData = ( await serverData.json() ) as FormData[];
                 setData(jsonData);
             } catch (err) {
                 console.log(err);
@@ -45,7 +35,7 @@ export default function PatientSection() {
 
             const response = await fetch("http://localhost:3001/deletePatient", delete_request);
             if (response.status === 200) {
-                setData( data.filter( (patient) => patient.patient_id !== patient_id))
+                setData( data.filter( (patient) => patient.patientId !== patient_id))
             }
 
         } catch (err) {
@@ -53,38 +43,24 @@ export default function PatientSection() {
         }
     }
 
-    const makePatientSection = (patient : PatientData) => {
-        const typesList = patient.types == null ? [] : patient.types.split(",");
-        const typeValueList = patient.type_values == null ? [] : patient.type_values.split(",");
-
-        const addressList : string[] = []
-        const otherList : string[][] = []
-
-        for (let index in typesList) {
-            if (typesList[index] === "Addresses") {
-                addressList.push(typeValueList[index])
-            } else {
-                otherList.push( [typesList[index], typeValueList[index]])
-            }
-        }
-
+    const makePatientSection = (patient : FormData) => {
         return (
-            <div key={`patient-${patient.patient_id}`}>
-                <p>{`First Name: ${patient.first}`}</p>
-                <p>{`Middle Name: ${patient.middle}`}</p>
-                <p>{`Last Name: ${patient.last}`}</p>
+            <div key={`patient-${patient.patientId}`}>
+                <p>{`First Name: ${patient.firstName}`}</p>
+                <p>{`Middle Name: ${patient.middleName}`}</p>
+                <p>{`Last Name: ${patient.lastName}`}</p>
                 <p>{`Status: ${patient.status}`}</p>
-                <p>{`Birthday: ${patient.birthday}`}</p>
+                <p>{`Birthday: ${patient.dateOfBirth}`}</p>
                 <p>Addresses</p>
                 <ul>
-                {addressList.map( (value, index) => 
+                {patient.addresses.map( (value, index) => 
                     <li key={`address-${index}`}>{value}</li>  
                 )}
                 </ul>
-                {otherList.map( (value, index) => 
-                    <p key={`other-${index}`}>{`${value[0]}: ${value[1]}`}</p>
+                {Object.keys(patient.additionalFields).map( (value,index) => 
+                    <p key={`other-${index}`}>{`${value}: ${patient.additionalFields[value]}`}</p>
                 )}
-                <button onClick={() => deletePatient(patient.patient_id)}>Delete Patient</button>
+                <button onClick={() => deletePatient(patient.patientId as string)}>Delete Patient</button>
                 <p>============================</p>
             </div>
         )
@@ -104,7 +80,7 @@ export default function PatientSection() {
                 body: JSON.stringify(data)
             }
             const response = await fetch(`http://localhost:3001/queryPatient`, request);
-            const patientData = (await response.json()) as PatientData[];
+            const patientData = (await response.json()) as FormData[];
             setData(patientData);
         } catch (err) {
             setFilterError("bad filter request");
