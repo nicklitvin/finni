@@ -6,6 +6,13 @@ const status_onboard : Status = "Onboarding";
 const status_active : Status = "Active";
 const status_churned: Status = "Churned";
 
+const text_first_name = "First Name";
+const text_middle_name = "Middle Name";
+const text_last_name = "Last Name";
+const text_birthday = "Date of Birth";
+const text_status = "Status";
+const text_addresses = "Addresses";
+
 export type FormData = {
     patientId: string | null;
     firstName: string;
@@ -25,19 +32,18 @@ export default function PatientForm () {
         lastName: '',
         dateOfBirth: '',
         status: "Active",
-        addresses: [],
+        addresses: [""],
         additionalFields: {}
     });
 
-    const [addresses, setAddresses] = React.useState<string[]>([""]);
     const [additionalFieldNames, setAdditionalFieldNames]= React.useState<string[]>([]);
     const [serverResponse, setServerResponse] = React.useState("");
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData({
-        ...formData,
-        [name]: value,
+            ...formData,
+            [name]: value
         });
     };
 
@@ -105,18 +111,15 @@ export default function PatientForm () {
     }
 
     const addNewAddress = () => {
-        const copy = [...addresses, ""];
-        setAddresses(copy);
         setFormData({
             ...formData,
-            addresses: copy
+            addresses: [...formData.addresses, ""]
         })
     }
 
     const changeAddress = (index : number, value : string) => {
-        const copy = [...addresses];
+        const copy = [...formData.addresses];
         copy[index] = value;
-        setAddresses(copy);
 
         setFormData({
             ...formData,
@@ -125,9 +128,8 @@ export default function PatientForm () {
     }
 
     const deleteAddress = (index : number) => {
-        const copy = [...addresses];
+        const copy = [...formData.addresses];
         copy.splice(index,1);
-        setAddresses(copy);
         setFormData({
             ...formData,
             addresses: copy
@@ -158,7 +160,7 @@ export default function PatientForm () {
         <div>
             <h1>Add Patient</h1>
             <label>
-            First Name:
+            {`${text_first_name}: `}
             <input
                 type="text"
                 name="firstName"
@@ -169,7 +171,7 @@ export default function PatientForm () {
             <br></br>
 
             <label>
-            Middle Name:
+            {`${text_middle_name}: `}
             <input
                 type="text"
                 name="middleName"
@@ -180,7 +182,7 @@ export default function PatientForm () {
             <br></br>
 
             <label>
-            Last Name:
+            {`${text_last_name}: `}
             <input
                 type="text"
                 name="lastName"
@@ -191,7 +193,7 @@ export default function PatientForm () {
             <br></br>
 
             <label>
-            Date of Birth:
+            {`${text_birthday}: `}
             <input
                 type="date"
                 name="dateOfBirth"
@@ -202,7 +204,7 @@ export default function PatientForm () {
             <br></br>
 
             <label>
-            Status:
+            {`${text_status}: `}
             <select
                 name="status"
                 value={formData.status}
@@ -217,13 +219,13 @@ export default function PatientForm () {
             <br></br>
 
             <label>
-            Addresses:
+            {`${text_addresses}: `}
             {
-                addresses.map( (value, index) => (
+                formData.addresses.map( (value, index) => (
                     <div key={index}>
                         <input
                             type="text"
-                            value={addresses[index]}
+                            value={formData.addresses[index]}
                             onChange={(e) => changeAddress(index, e.target.value)}
                         />
                         {

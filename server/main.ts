@@ -20,6 +20,12 @@ const column_status = "status";
 const column_data_type = "data_type";
 const column_data_value = "data_value";
 
+const text_first_name = "First Name";
+const text_middle_name = "Middle Name";
+const text_last_name = "Last Name";
+const text_birthday = "Date of Birth";
+const text_status = "Status";
+
 const varchar = "varchar(255)";
 
 type FormData = {
@@ -224,19 +230,19 @@ class dbManger {
         }
 
         switch (field) {
-            case ("First Name"):
+            case (text_first_name):
                 query = basicQuery(column_first_name);
                 break;
-            case ("Middle Name"):
+            case (text_middle_name):
                 query = basicQuery(column_middle_name);
                 break;
-            case ("Last Name"):
+            case (text_last_name):
                 query = basicQuery(column_last_name);
                 break;
-            case ("Status"):
+            case (text_status):
                 query = basicQuery(column_status);
                 break;    
-            case ("Date Of Birth"):
+            case (text_birthday):
                 query = basicQuery(column_birthday);
                 break;
             case (""):
